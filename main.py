@@ -94,7 +94,7 @@ def arrangeTorrent(torrentDir, torrentName):
             if mode == '1': targetDir = os.path.join(config['General']['LibraryPath'], originalTitle) 
             else: targetDir = torrentDir
             shutil.move(torrentPath, os.path.join(checkDir(os.path.join(targetDir,'Season ' + seasonID)),filename))
-            shutil.rmtree(torrentPath)
+            shutil.rmtree(torrentDir)
     else: print(torrentPath, 'is not a file!')
 
 if __name__ == '__main__':
