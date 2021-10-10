@@ -48,7 +48,7 @@ def getAnidbID(pattern):
     root = tree.getroot()
     for child in root:
         for children in child:
-            matchTitle = re.search(pattern, children.text)
+            matchTitle = re.search(pattern, children.text, re.I)
             if matchTitle:
                 return child.attrib['aid']
 
