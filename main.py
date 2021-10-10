@@ -23,19 +23,21 @@ def checkVersion():
 
 def updateAnimeList():
     checkDir(sys.path[0] + '/data/')
-    print('updating anime-list.xml')
-    with open(sys.path[0] + '/data/anime-list.xml','wb') as list_file:
-        with urllib.request.urlopen('https://github.com/Anime-Lists/anime-lists/raw/master/anime-list.xml') as response:
-            r_list = response.read()
-        list_file.write(r_list)
-    print('updating animetitles.xml')
-    with open(sys.path[0] + '/data/animetitles.xml','wb') as title_file:
-        with urllib.request.urlopen('https://github.com/Anime-Lists/anime-lists/raw/master/animetitles.xml') as response:
-            r_title = response.read()
-        title_file.write(r_title)
-    with open(sys.path[0] + '/data/.version', 'w') as version:
-        version.write(currentDate)
-        print("\nanime-list is up to date now\n")
+    try:
+        print('updating anime-list.xml')
+        response = urllib.request.urlopen('https://cdn.jsdelivr.net/gh11/Anime-Lists/anime-lists/anime-list.xml')
+        r_list = response.read( )
+        with open(sys.path[0] + '/data/anime-list.xml','wb') as list_file: list_file.write(r_list)
+        print('updating animetitles.xml')
+        response = urllib.request.urlopen('https://cdn.jsdelivr.net/gh11/Anime-Lists/anime-lists/animetitles.xml')
+        r_title = response.read()
+        with open(sys.path[0] + '/data/animetitles.xml','wb') as title_file: title_file.write(r_title)     
+        with open(sys.path[0] + '/data/.version', 'w') as version:
+            version.write(currentDate)
+            print("\nanime-list is up to date now\n")
+    except urllib.error.URLError as e:
+        print('Error in updating AnimeList\n', e.reason, '\nUpdate Failed')
+
 
 def fuzzyPattern(originalTitle):
     print('title:', originalTitle)
