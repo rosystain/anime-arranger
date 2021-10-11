@@ -3,12 +3,6 @@ import xml.etree.ElementTree as ET
 import urllib.request, time, sys
 import configparser
 
-torrentDir = sys.argv[1]
-torrentName = sys.argv[2]
-torrentPath = os.path.join(torrentDir, torrentName)
-
-currentDate = time.strftime("%Y-%m-%d", time.localtime())
-
 def checkVersion():
     version_file = sys.path[0] + '/data/.version'
     if os.path.exists(version_file):
@@ -32,27 +26,27 @@ def updateAnimeList():
         response = urllib.request.urlopen('https://cdn.jsdelivr.net/gh11/Anime-Lists/anime-lists/animetitles.xml')
         r_title = response.read()
         with open(sys.path[0] + '/data/animetitles.xml','wb') as title_file: title_file.write(r_title)     
-        with open(sys.path[0] + '/data/.version', 'w') as version:
-            version.write(currentDate)
-            print("\nanime-list is up to date now\n")
+        with open(sys.path[0] + '/data/.version', 'w') as version: version.write(currentDate)
+        print('\nAnimelist is up to date now\n')
     except urllib.error.URLError as e:
-        print('Error in updating AnimeList\n', e.reason, '\nUpdate Failed')
+        print('Error in updating Animelist\n', e.reason, '\nUpdate Failed')
 
 
 def fuzzyPattern(originalTitle):
     print('title:', originalTitle)
-    clearTitle = re.sub(r'\W','', originalTitle)
-    pattern = '.*'.join(clearTitle)
+    pattern = re.sub(r'\W','.*', originalTitle)
     return pattern
 
 def getAnidbID(pattern):
     tree = ET.parse(sys.path[0] + '/data/animetitles.xml')
     root = tree.getroot()
+    suggestions = {}
     for child in root:
         for children in child:
             matchTitle = re.search(pattern, children.text, re.I)
             if matchTitle:
-                return child.attrib['aid']
+                suggestions[children.text] = child.attrib['aid']
+    return suggestions[min(list(suggestions.keys()))]
 
 def getRelationship(aid):
     tree = ET.parse(sys.path[0] + '/data/anime-list.xml')
@@ -100,4 +94,9 @@ def arrangeTorrent(torrentDir, torrentName):
     else: print(torrentPath, 'is not a file!')
 
 if __name__ == '__main__':
+    torrentDir = sys.argv[1]
+    torrentName = sys.argv[2]
+    torrentPath = os.path.join(torrentDir, torrentName)
+    currentDate = time.strftime("%Y-%m-%d", time.localtime())
+    
     arrangeTorrent(torrentDir, torrentName) 
