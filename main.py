@@ -31,22 +31,31 @@ def updateAnimeList():
     except urllib.error.URLError as e:
         print('Error in updating Animelist\n', e.reason, '\nUpdate Failed')
 
-
-def fuzzyPattern(originalTitle):
-    print('title:', originalTitle)
+def getAnidbID(originalTitle):
     pattern = re.sub(r'\W','.*', originalTitle)
-    return pattern
-
-def getAnidbID(pattern):
-    tree = ET.parse(sys.path[0] + '/data/animetitles.xml')
-    root = tree.getroot()
-    suggestions = {}
-    for child in root:
-        for children in child:
-            matchTitle = re.search(pattern, children.text, re.I)
-            if matchTitle:
-                suggestions[children.text] = child.attrib['aid']
-    return suggestions[min(list(suggestions.keys()))]
+    try:
+        tree = ET.parse(sys.path[0] + '/data/animetitles.xml')
+        root = tree.getroot()
+        suggestions = {}
+        chineseNum = {'一':1, '二':2, '三':3, '四':4, '五':5, '六':6, '七':7, '八':8, '九':9, '十':10}
+        for child in root:
+            for children in child:
+                matchChineseSeason = re.search(r'第(\w)季', children.text)
+                if matchChineseSeason and matchChineseSeason.group(1) in list(chineseNum.keys()):
+                    matchText = re.sub(r'第\w季', str(chineseNum[matchChineseSeason.group(1)]), children.text)
+                else: matchText = children.text
+                matchTitle = re.search(pattern, matchText, re.I)
+                if matchTitle: suggestions[children.text] = child.attrib['aid']
+        for l in list(suggestions.keys()):
+            if originalTitle == l: return suggestions[l] # Try matching original title directly
+        return suggestions[min(list(suggestions.keys()), key=len)]
+    except ValueError:
+        print('Error occurred when matching', originalTitle)
+        matchSeasonNum = re.search(r'S\d{1}', originalTitle, re.I)
+        if matchSeasonNum: # title contains season number
+            fixedTitle = re.sub(r'S(\d)',r'\1', originalTitle)
+            print('Try', fixedTitle)
+            return getAnidbID(fixedTitle)
 
 def getRelationship(aid):
     tree = ET.parse(sys.path[0] + '/data/anime-list.xml')
@@ -90,7 +99,7 @@ def arrangeTorrent(torrentDir, torrentName):
             if mode == '1': targetDir = os.path.join(config['General']['LibraryPath'], originalTitle) 
             else: targetDir = torrentDir
             shutil.move(torrentPath, os.path.join(checkDir(os.path.join(targetDir,'Season ' + seasonID)),filename))
-            shutil.rmtree(torrentDir)
+            os.removedirs(torrentDir)
     else: print(torrentPath, 'is not a file!')
 
 if __name__ == '__main__':
