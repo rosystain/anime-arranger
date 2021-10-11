@@ -7,7 +7,7 @@ Using [Anime-Lists](https://github.com/Anime-Lists/anime-lists) to get relations
 
 ### Run with CLI
 ```
-/path/to/python3 anime.py [DIRNAME] [FILENAME]
+/path/to/python3 main.py [DIRNAME] [FILENAME]
 ```
 
 ### Config
